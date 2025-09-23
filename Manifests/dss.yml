@@ -1,0 +1,89 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: engee-secrets
+type: Opaque
+data:
+  CLOUDINARY_CLOUD_NAME: ZHZid3lxeGlrCg==
+  CLOUDINARY_KEY: NDM4Mjc1NzcyOTczMjYzCg==
+  CLOUDINARY_SECRET: anB3SUpxLTY3OUZ0dmR1N0NLVmNBZkFIYUlBCg==
+  MAPBOX_TOKEN: c2suZXlKMUlqb2laVzVuWldVaUxDSmhJam9pWTIxbWQyVmpNWEJ5TURFMmVqSnBjMlZyYTNKb05XZDJlaUo5LlJIS0k5ZkFWVEF1REwtMmFVdWNKYXcK
+  DB_URL: bW9uZ29kYitzcnY6Ly9lbmdlZV9kYl91c2VyOkNBQUQ0LXByb2plY3QtcHN3QGVuZ2VlLWNsdXN0ZXIuMTJhcXU4cy5tb25nb2RiLm5ldC8/cmV0cnlXcml0ZXM9dHJ1ZSZ3PW1ham9yaXR5JmFwcE5hbWU9ZW5nZWUtY2x1c3Rlcgo=
+  SECRET: ZW5nZWVzZWNyZXRzCg==
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: engee-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: engee
+  template:
+    metadata:
+      labels:
+        app: engee
+    spec:
+      containers:
+        - name: engee-container
+          image: adijaiswal/campa:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: CLOUDINARY_CLOUD_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: engee-secrets
+                  key: CLOUDINARY_CLOUD_NAME
+            - name: CLOUDINARY_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: engee-secrets
+                  key: CLOUDINARY_KEY
+            - name: CLOUDINARY_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: engee-secrets
+                  key: CLOUDINARY_SECRET
+            - name: MAPBOX_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: engee-secrets
+                  key: MAPBOX_TOKEN
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: engee-secrets
+                  key: DB_URL
+            - name: SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: engee-secrets
+                  key: SECRET
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 30   # Adjust the initial delay here
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 30   # Adjust the initial delay here
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: engee-service
+spec:
+  selector:
+    app: engee
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: LoadBalancer

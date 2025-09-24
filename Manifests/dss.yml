@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
         - name: engee-container
-          image: adijaiswal/campa:latest
+          image: ngozin/3tierapp:latest
           ports:
             - containerPort: 3000
           env:
